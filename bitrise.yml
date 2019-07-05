@@ -5,7 +5,7 @@ app:
   envs:
   # If you want to share this step into a StepLib
   - BITRISE_STEP_ID: bluepill-build-test-for-ios
-  - BITRISE_STEP_VERSION: "0.1.0"
+  - BITRISE_STEP_VERSION: "0.1.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/HealthEngineAU/bitrise-step-bluepill-build-test-for-ios.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
 
@@ -32,11 +32,12 @@ workflows:
           file if you would not specify another value.
         run_if: true
         inputs:
-        - app_name: TestApp
-        - workspace: TestApp.xcworkspace
-        - scheme: TestApp
+        - app_name: HealthEngine
+        - workspace: HealthEngine.xcworkspace
+        - scheme: HealthEngine
         - derived_data_path: build
         - device_type: "iPhone SE"
+        - bluepill_output_dir: bluepill-output
         - failure_tolerance: 1
     - script:
         inputs:

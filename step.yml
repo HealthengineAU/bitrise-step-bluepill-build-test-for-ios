@@ -67,7 +67,7 @@ inputs:
   - bluepill_output_dir: "bluepill-output"
     opts:
       title: "Directory for Bluepill logs/results"
-      summary: "Increasing the number of simulators can affect stability/timeouts in your test."
+      summary: "Directory to place all the bluepill logs/results files."
       is_expand: true
       is_required: true
   - device_type: "iPhone 6"
