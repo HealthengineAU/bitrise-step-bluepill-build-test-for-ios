@@ -5,14 +5,34 @@ set -e
 
 printf "\n\nInstalling dependencies...\n"
 
-# Install Bluepill 4.1.1
-# https://github.com/linkedin/bluepill
-brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/1ed242fd12ded7f685ec67128ec739e6a9e1baa3/Formula/bluepill.rb
+# Supported Bluepill versions and their associated brew commits
+bluepill_4_1_1__xcode_10_2=1ed242fd12ded7f685ec67128ec739e6a9e1baa3
+bluepill_3_1_1__xcode_10_1=a07abe758e78d90cd178b4f3207c84a181237206
+bluepill_3_1_0__xcode_10_0=7fb99338e66b1ce1dd0d8f1a83051f8e9a044770
+bluepill_2_4_0__xcode_9_4=0f881ea1286274f62a9fa6e649985b7e6599cd11
+bluepill_2_3_1__xcode_9_3=5f8348a9f1f17d9d2f2e57f3b7981f3248bd5e82
+bluepill_2_2_0__xcode_9_2=86beeb08e9f7f9e9e435fa9fe1250729ae3a677e
+bluepill_2_1_0__xcode_9_1=c740eba675f665946c4af57f9fef2c1cae07c8a7
+bluepill_2_0_2__xcode_9_0=c78ab93d962f9287cc90cb40ad13a398020a5744
+bluepill_1_1_2__xcode_8_3=976ae7613ed70fa25139cc52e511005558100b35
 
-# Install junitparser for parsing test results
+if [ -z "${!bluepill_version}" ];then
+  echo "Unrecognised Bluepill version passed: $bluepill_version"
+  exit -1
+fi
+
+# Install Bluepill (if none installed already)
+brew list bluepill \
+  || brew install "https://raw.githubusercontent.com/Homebrew/homebrew-core/${!bluepill_version}/Formula/bluepill.rb"
+
+# Install Python 3 (if none installed already)
+brew list python3 \
+  || brew install python3 \
+  && brew postinstall python3
+
+# Install junitparser and the `PrintBluepillJUnitResults.py` Python 3 script for parsing test results
 pip3 install junitparser
-result_parser_url="https://gist.githubusercontent.com/reececomo/81b64b1a3423d9b793f3c610897ab590/raw/6839897c18eb6ecc1a367c40bf96cf1c86360501/PrintBluepillJUnitResults.py"
-curl ${result_parser_url} > 'PrintBluepillJUnitResults.py'
+curl -L https://git.io/fj6hp > PrintBluepillJUnitResults.py
 
 # ---  2. BUILD ---
 
@@ -24,8 +44,7 @@ xcodebuild build-for-testing \
   -workspace "${workspace}" \
   -scheme "${scheme}" \
   -destination "platform=iOS Simulator,name=${device_type},OS=${ios_version}" \
-  -enableCodeCoverage "YES" \
-  | xcpretty
+  -enableCodeCoverage "YES"
 
 # ---  3. RUN TESTS --- #
 
@@ -54,7 +73,7 @@ set -e
 
 # Parse results
 results_full=$( printf "$( python3 PrintBluepillJUnitResults.py "${report_output_dir}/TEST-FinalReport.xml" )" )
-results_slack=$( printf "$( python3 PrintBluepillJUnitResults.py "${report_output_dir}/TEST-FinalReport.xml" )" slack )
+results_markdown=$( printf "$( python3 PrintBluepillJUnitResults.py "${report_output_dir}/TEST-FinalReport.xml" )" slack )
 
 # --- 4. COLLECT COVERAGE ---
 
@@ -67,14 +86,14 @@ xcrun llvm-profdata merge \
 # Generate coverage report
 xcrun llvm-cov show \
     -instr-profile ${bluepill_output_dir}/Coverage.profdata \
-    ${derived_data_path}/Build/Products/*/${app_name}.app/${app_name} \
-    > ${bluepill_output_dir}/${app_name}.app.coverage.txt
+    ${derived_data_path}/Build/Products/*/${target_name}.app/${target_name} \
+    > ${bluepill_output_dir}/${target_name}.app.coverage.txt
 
 # --- 5. EXPORT ENV VARS ---
 
 # Test results (human readable)
 envman add --key "${test_result_env_var}" --value "$results_full"
-envman add --key "${test_result_env_var}_SLACK" --value "$results_slack"
+envman add --key "${test_result_env_var}_MARKDOWN" --value "$results_markdown"
 
 # --- 6. PRINT TEST RESULTS ---
 
