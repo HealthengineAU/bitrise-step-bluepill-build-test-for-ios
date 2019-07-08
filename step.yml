@@ -15,6 +15,11 @@ is_requires_admin_user: true
 is_always_run: false
 is_skippable: false
 run_if: ""
+deps:
+  brew:
+    - name: python3
+  check_only:
+    - name: xcode
 toolkit:
   bash:
     entry_file: step.sh
@@ -61,7 +66,7 @@ inputs:
   - bluepill_output_dir: "bluepill-output"
     opts:
       title: "Directory for Bluepill logs/results"
-      summary: "Directory to place all the bluepill logs/results files."
+      summary: "Directory to place all the bluepill logs/results files. Individual run reports will sit inside this directory, named like: \"iPhone SE - 12.2 - TIMESTAMP\""
       is_expand: true
       is_required: true
   - device_type: "iPhone 6"
@@ -82,6 +87,14 @@ inputs:
       summary: "Number of iOS simulators to run in parallel"
       is_expand: true
       is_required: true
+  - fail_build_if_coverage_fails: false
+    opts:
+      title: "Fail build if coverage fails"
+      summary: "Fail the build if Bluepill fails to gather valid coverage data (e.g. ${bluepill_output_dir}/${target_name}.app.coverage.txt)"
+      is_required: true
+      value_options:
+      - false
+      - true
   - test_result_env_var: "TEST_RESULTS"
     opts:
       title: "Test Results Env Var"
@@ -108,4 +121,4 @@ inputs:
       title: "Additional bluepill arguments"
       summary: "See https://github.com/linkedin/bluepill for a full list of supported args."
       is_expand: true
-      is_required: true
+      is_required: false

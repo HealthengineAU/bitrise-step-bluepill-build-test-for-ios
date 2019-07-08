@@ -1,42 +1,37 @@
 #!/bin/bash
 set -e
 
+# Dependency directories
+STEP_DIR="$( dirname "${BASH_SOURCE[0]}" )"
+DEPS_DIR="$STEP_DIR/deps"
+
 # ---  1. INSTALL DEPENDENCIES ---
 
-printf "\n\nInstalling dependencies...\n"
+printf "\n\nInstalling Bluepill/junitparser...\n"
 
-# Supported Bluepill versions and their associated brew commits
-bluepill_4_1_1__xcode_10_2=1ed242fd12ded7f685ec67128ec739e6a9e1baa3
-bluepill_3_1_1__xcode_10_1=a07abe758e78d90cd178b4f3207c84a181237206
-bluepill_3_1_0__xcode_10_0=7fb99338e66b1ce1dd0d8f1a83051f8e9a044770
-bluepill_2_4_0__xcode_9_4=0f881ea1286274f62a9fa6e649985b7e6599cd11
-bluepill_2_3_1__xcode_9_3=5f8348a9f1f17d9d2f2e57f3b7981f3248bd5e82
-bluepill_2_2_0__xcode_9_2=86beeb08e9f7f9e9e435fa9fe1250729ae3a677e
-bluepill_2_1_0__xcode_9_1=c740eba675f665946c4af57f9fef2c1cae07c8a7
-bluepill_2_0_2__xcode_9_0=c78ab93d962f9287cc90cb40ad13a398020a5744
-bluepill_1_1_2__xcode_8_3=976ae7613ed70fa25139cc52e511005558100b35
+# Check the Bluepill version is one of the above supported options
+bluepill_formulae_file="$DEPS_DIR/bluepill-formulae/$bluepill_version.rb"
 
-if [ -z "${!bluepill_version}" ];then
-  echo "Unrecognised Bluepill version passed: $bluepill_version"
+if [ -f "$bluepill_formulae_file" ]; then
+  echo "Installing Bluepill ($bluepill_version).rb..."
+  brew list bluepill \
+    && echo "  ...already installed." \
+    || brew install "$DEPS_DIR/bluepill-formulae/$bluepill_version.rb"
+else
+  echo "Unrecognised Bluepill version string passed: '$bluepill_version'"
   exit -1
 fi
 
-# Install Bluepill (if none installed already)
-brew list bluepill \
-  || brew install "https://raw.githubusercontent.com/Homebrew/homebrew-core/${!bluepill_version}/Formula/bluepill.rb"
-
-# Install Python 3 (if none installed already)
-brew list python3 \
-  || brew install python3 \
-  && brew postinstall python3
-
-# Install junitparser and the `PrintBluepillJUnitResults.py` Python 3 script for parsing test results
+# Install junitparser to run the `PrintBluepillJUnitResults.py` script for parsing test results
 pip3 install junitparser
-curl -L https://git.io/fj6hp > PrintBluepillJUnitResults.py
 
 # ---  2. BUILD ---
 
 printf "\n\nBuilding App...\n"
+
+# Use xcpretty to pipe pretty build logs if available, otherwise cat
+# Not going to require this as a hard dependency because it's just a nice-to-have.
+XCPRETTY_OR_CAT=$(which xcpretty && echo xcpretty || echo cat)
 
 # Build for testing
 xcodebuild build-for-testing \
@@ -44,7 +39,8 @@ xcodebuild build-for-testing \
   -workspace "${workspace}" \
   -scheme "${scheme}" \
   -destination "platform=iOS Simulator,name=${device_type},OS=${ios_version}" \
-  -enableCodeCoverage "YES"
+  -enableCodeCoverage "YES" \
+  | eval $XCPRETTY_OR_CAT
 
 # ---  3. RUN TESTS --- #
 
@@ -68,26 +64,38 @@ bluepill --xctestrun-path "${derived_data_path}"/Build/Products/*.xctestrun \
     -H on ${additional_bluepill_args} \
     || tests_failed=true
 
-# ...renable failures for the remainder of the script.
+# ...renable failures.
 set -e
 
 # Parse results
-results_full=$( printf "$( python3 PrintBluepillJUnitResults.py "${report_output_dir}/TEST-FinalReport.xml" )" )
-results_markdown=$( printf "$( python3 PrintBluepillJUnitResults.py "${report_output_dir}/TEST-FinalReport.xml" )" slack )
+results_full=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" )
+results_markdown=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" slack )
 
 # --- 4. COLLECT COVERAGE ---
+
+# Don't fail the build if coverage fail...
+set +e
+
+coverage_file="${bluepill_output_dir}/${target_name}.app.coverage.txt"
 
 # Merge coverage profile
 xcrun llvm-profdata merge \
     -sparse \
     -o ${bluepill_output_dir}/Coverage.profdata \
-    ${bluepill_output_dir}/**/**/*.profraw
+    ${bluepill_output_dir}/**/**/*.profraw \
+    || coverage_failed=true
 
 # Generate coverage report
-xcrun llvm-cov show \
-    -instr-profile ${bluepill_output_dir}/Coverage.profdata \
-    ${derived_data_path}/Build/Products/*/${target_name}.app/${target_name} \
-    > ${bluepill_output_dir}/${target_name}.app.coverage.txt
+if ! [ $coverage_failed ]; then
+  xcrun llvm-cov show \
+      -instr-profile ${bluepill_output_dir}/Coverage.profdata \
+      ${derived_data_path}/Build/Products/*/${target_name}.app/${target_name} \
+      > ${coverage_file} \
+      || coverage_failed=true
+fi
+
+# ...renable failures.
+set -e
 
 # --- 5. EXPORT ENV VARS ---
 
@@ -95,16 +103,28 @@ xcrun llvm-cov show \
 envman add --key "${test_result_env_var}" --value "$results_full"
 envman add --key "${test_result_env_var}_MARKDOWN" --value "$results_markdown"
 
-# --- 6. PRINT TEST RESULTS ---
+# --- 6. PRINT TEST RESULTS TO CONSOLE ---
 
 printf "$results_full"
 
 # --- 7. PASS/FAIL THE STEP ---
 
 # Fail the step if there was an error
-if [ $tests_failed ]
+if [ "$tests_failed" == "true" ]
 then
+  exit -1
+fi
+
+# Coverage logging
+if [ "$coverage_failed" == "true" ]; then
+  if [ "$fail_build_if_coverage_fails" == "true" ]; then
+    printf "\nFailed to gather coverage data and \$fail_build_if_coverage_fails is set to true.\n"
     exit -1
+  else
+    printf "\nFailed to gather coverage data but \$fail_build_if_coverage_fails is set to false.\n"
+  fi
+else
+  printf "\nCoverage report generated at: $coverage_file\n"
 fi
 
 exit 0

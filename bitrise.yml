@@ -3,6 +3,8 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
+  - BITRISE_STEP_ID: bluepill-build-test-for-ios
+  - BITRISE_STEP_VERSION: "0.2.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/HealthEngineAU/bitrise-step-bluepill-build-test-for-ios.git
   - BITRISE_SAMPLE_APP: https://github.com/reececomo/sample-apps-ios-workspace-swift.git
 
@@ -14,7 +16,10 @@ workflows:
     - script:
         title: Remove existing _tmp dir (if exists)
         inputs:
-        - content: rm -rf _tmp
+        - content: |
+            #!/bin/bash
+            set +e
+            rm -rf _tmp
     - change-workdir:
         title: Switch working dir to test / _tmp dir
         run_if: true
