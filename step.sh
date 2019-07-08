@@ -7,20 +7,21 @@ DEPS_DIR="$STEP_DIR/deps"
 
 # ---  1. INSTALL DEPENDENCIES ---
 
-printf "\n\nInstalling Bluepill/junitparser...\n"
+bluepill_formulae_file="$DEPS_DIR/brew-formulae/$bluepill_version/bluepill.rb"
 
-# Check the Bluepill version is one of the above supported options
-bluepill_formulae_file="$DEPS_DIR/bluepill-formulae/$bluepill_version.rb"
-
+# Check if the Bluepill formulae is supported
 if [ -f "$bluepill_formulae_file" ]; then
-  echo "Installing Bluepill ($bluepill_version).rb..."
+  printf "\n\nInstalling Bluepill ($bluepill_version/bluepill.rb)...\n"
+
   brew list bluepill \
     && echo "  ...already installed." \
-    || brew install "$DEPS_DIR/bluepill-formulae/$bluepill_version.rb"
+    || brew install "$bluepill_formulae_file"
 else
-  echo "Unrecognised Bluepill version string passed: '$bluepill_version'"
+  printf "Unrecognised Bluepill version identifier passed: '$bluepill_version'\n"
   exit -1
 fi
+
+printf "\n\nInstalling junitparser...\n"
 
 # Install junitparser to run the `PrintBluepillJUnitResults.py` script for parsing test results
 # Allow this part to fail silently
