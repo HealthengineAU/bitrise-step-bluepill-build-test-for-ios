@@ -23,7 +23,11 @@ else
 fi
 
 # Install junitparser to run the `PrintBluepillJUnitResults.py` script for parsing test results
+# Allow this part to fail silently
+set +e
+brew list python3 || brew install python3 && brew postinstall python3
 pip3 install junitparser
+set -e
 
 # ---  2. BUILD ---
 
@@ -68,8 +72,13 @@ bluepill --xctestrun-path "${derived_data_path}"/Build/Products/*.xctestrun \
 set -e
 
 # Parse results
-results_full=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" )
-results_markdown=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" slack )
+if [ -f "$bluepill_formulae_file" ]; then
+  results_full=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" )
+  results_markdown=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" slack )
+else
+  results_full="Bluepill failed to generate a final test report."
+  results_markdown="$results_full"
+fi
 
 # --- 4. COLLECT COVERAGE ---
 
@@ -86,7 +95,7 @@ xcrun llvm-profdata merge \
     || coverage_failed=true
 
 # Generate coverage report
-if ! [ $coverage_failed ]; then
+if ! [ "$coverage_failed" == "true" ]; then
   xcrun llvm-cov show \
       -instr-profile ${bluepill_output_dir}/Coverage.profdata \
       ${derived_data_path}/Build/Products/*/${target_name}.app/${target_name} \
