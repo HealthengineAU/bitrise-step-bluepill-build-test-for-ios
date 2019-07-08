@@ -89,7 +89,7 @@ inputs:
   - test_result_env_var: "TEST_RESULTS"
     opts:
       title: "Test Results Env Var"
-      summary: "Environment variable to capture test results in (as a string). This will also produce a Markdown-formatted copy with the '_MARKDOWN' suffix. e.g. ('MY_RESULT' and 'MY_RESULT_MARKDOWN')"
+      summary: "Environment variable to capture test results as a human-readable string. This will also produce a Markdown-formatted copy with the `_MARKDOWN` suffix. e.g. (`MY_RESULT` and `MY_RESULT_MARKDOWN`)"
       is_expand: true
       is_required: true
   - retry_only_failed_tests: true

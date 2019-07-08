@@ -75,7 +75,7 @@ set -e
 # Parse results
 if [ -f "$bluepill_formulae_file" ]; then
   results_full=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" )
-  results_markdown=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" )" slack )
+  results_markdown=$( printf "$( python3 "$DEPS_DIR/PrintBluepillJUnitResults.py" "${report_output_dir}/TEST-FinalReport.xml" markdown )" )
 else
   results_full="Bluepill failed to generate a final test report."
   results_markdown="$results_full"

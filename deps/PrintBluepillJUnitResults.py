@@ -101,8 +101,8 @@ def getTestErrors(testSuites):
 
     return testErrors
 
-def printForTerminal(testErrors):
-    """Formatted for terminal
+def printResults(testErrors):
+    """Formatted for terminal output
 
     MyCareTeamTests/testAddToMyCareTeamButton (1)
     Error: "No matches found for first match sequence"
@@ -119,8 +119,8 @@ def printForTerminal(testErrors):
     if len(testErrors) == 0:
         print("All tests passed.")
     else:
-        print("There were {} errors/failures ({} unique):\n".format(len(testErrors),
-                                                                    len(uniqueTestErrors)))
+        print("There were {} unique errors/failures ({} total):\n".format(len(uniqueTestErrors),
+                                                                    len(testErrors)))
 
     for error in uniqueTestErrors:
         occurences = testErrors.count(error)
@@ -132,32 +132,30 @@ Traceback:\n{trace}\n""".format(e=error,
                                 occurences=occurences,
                                 trace=error.trace))
 
-def printForSlack(testErrors):
-    """Formatted for slack
+def printResultsAsMarkdown(testErrors):
+    """Formatted as Markdown (for Slack)
 
     MyCareTeamTests/testAddToMyCareTeamButton (1)
-    Error: "No matches found for first match sequence"
-    Location: XCUIElement+Extension.swift:122
-    Trackback:
-    XCTestOutputBarrier    t =    14.25s Assertion Failure: XCUIElement+Extension.swift:122: No matches found for first match sequence (
+    XCUIElement+Extension.swift:122 ("No matches found for first match sequence")
+    ```XCTestOutputBarrier    t =    14.25s Assertion Failure: XCUIElement+Extension.swift:122: No matches found for first match sequence (
         "&lt;XCTElementFilteringTransformer: 0x6000009d7f90 'Find: Descendants matching type Button'&gt;",
         "&lt;XCTElementFilteringTransformer: 0x6000009e4360 'Find: Elements matching predicate '\"Book\" IN identifiers''&gt;"
     ) from input
-        t =    14.32s Tear Down
+        t =    14.32s Tear Down```
     """
     uniqueTestErrors = set(testErrors)
 
     if len(testErrors) == 0:
         print("All tests passed.")
     else:
-        print("There were {} errors/failures ({} unique):\n".format(len(testErrors),
-                                                                    len(uniqueTestErrors)))
+        print("There were {} unique errors/failures ({} total):\n".format(len(uniqueTestErrors),
+                                                                          len(testErrors)))
 
     for error in uniqueTestErrors:
         occurences = testErrors.count(error)
 
         print(""">*{e.name} ({occurences})*
->{e.message}
+>{e.location} ("{e.message}")
 >```{trace}```\n""".format(e=error,
                          occurences=occurences,
                          trace=getLastXLines(error.trace, 5)))
@@ -179,10 +177,10 @@ def main():
     else:
         mode = sys.argv[2]
 
-    if mode == "slack":
-        printForSlack(testErrors)
+    if mode == "markdown":
+        printResultsAsMarkdown(testErrors)
     else:
-        printForTerminal(testErrors)
+        printResults(testErrors)
 
 if __name__ == "__main__":
     main()
