@@ -48,18 +48,6 @@ inputs:
       summary: "Xcode workspace file (e.g. MyApp.xcworkspace)"
       is_expand: true
       is_required: true
-  - derived_data_path: ""
-    opts:
-      title: "Derived Data Path"
-      summary: "Derived data directory (e.g. 'build')"
-      is_expand: true
-      is_required: true
-  - bluepill_output_dir: "bluepill-output"
-    opts:
-      title: "Directory for Bluepill logs/results"
-      summary: "Directory to place all the bluepill logs/results files. Individual run reports will sit inside this directory, named like: \"iPhone SE - 12.2 - TIMESTAMP\""
-      is_expand: true
-      is_required: true
   - device_type: "iPhone 6"
     opts:
       title: "Device Type"
@@ -72,44 +60,56 @@ inputs:
       summary: "iOS Version to build/run simulators (e.g. '11.0', '12.2')"
       is_expand: true
       is_required: true
-  - num_simulators: 3
+  - derived_data_path: ""
     opts:
-      title: "Num. Simulators"
-      summary: "Number of iOS simulators to run in parallel"
+      title: "Derived Data Path"
+      summary: "Derived data directory (e.g. 'build')"
       is_expand: true
       is_required: true
+  - bluepill_output_dir: "bluepill-output"
+    opts:
+      title: "Bluepill Logs Path"
+      summary: "Directory to place all the bluepill logs/results files. Individual test reports will sit inside this directory, named like: \"iPhone SE - 12.2 - TIMESTAMP\""
+      is_expand: true
+      is_required: true
+  - num_simulators: 4
+    opts:
+      title: "Num. Simulators (-n)"
+      summary: "Number of iOS simulators to run in parallel."
+      is_expand: true
+      is_required: true
+  - failure_tolerance: 0
+    opts:
+      title: "Failure Tolerance (-f)"
+      summary: "Number of times to retry on test failures."
+      is_expand: true
+      is_required: true
+  - retry_only_failed_tests: false
+    opts:
+      title: "Only retry tests that failed? (-F)"
+      summary: "When Failure Tolerance is above zero, only retry tests that failed."
+      is_expand: true
+      is_required: true
+      value_options:
+      - true
+      - false
+  - additional_bluepill_args: ""
+    opts:
+      title: "Additional Bluepill arguments"
+      summary: "See https://github.com/linkedin/bluepill for a full list of supported argumentss."
+      is_expand: true
+      is_required: false
   - fail_build_if_coverage_fails: false
     opts:
-      title: "Fail build if coverage fails"
-      summary: "Fail the build if Bluepill fails to gather valid coverage data (e.g. ${bluepill_output_dir}/${target_name}.app.coverage.txt)"
+      title: "Fail Build on Invalid Coverage Data"
+      summary: "Fail the build if Bluepill fails to gather valid coverage data (e.g. `${bluepill_output_dir}/${target_name}.app.coverage.txt`)"
       is_required: true
       value_options:
       - false
       - true
   - test_result_env_var: "TEST_RESULTS"
     opts:
-      title: "Test Results Env Var"
+      title: "Test Results Output Environment Variable"
       summary: "Environment variable to capture test results as a human-readable string. This will also produce a Markdown-formatted copy with the `_MARKDOWN` suffix. e.g. (`MY_RESULT` and `MY_RESULT_MARKDOWN`)"
       is_expand: true
       is_required: true
-  - retry_only_failed_tests: true
-    opts:
-      title: "Only retry tests that failed?"
-      summary: "When Failure Tolerance > 0, only retry tests that failed."
-      is_expand: true
-      is_required: true
-      value_options:
-      - true
-      - false
-  - failure_tolerance: 0
-    opts:
-      title: "Failure Tolerance"
-      summary: "Number of times to retry on test failures."
-      is_expand: true
-      is_required: true
-  - additional_bluepill_args: ""
-    opts:
-      title: "Additional bluepill arguments"
-      summary: "See https://github.com/linkedin/bluepill for a full list of supported args."
-      is_expand: true
-      is_required: false
