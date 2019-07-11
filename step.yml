@@ -84,29 +84,27 @@ inputs:
       summary: "Number of times to retry on test failures."
       is_expand: true
       is_required: true
-  - retry_only_failed_tests: false
+  - retry_only_failed_tests: "false"
     opts:
-      title: "Only retry tests that failed? (-F)"
+      title: "Only Retry Failed Tests? (-F)"
       summary: "When Failure Tolerance is above zero, only retry tests that failed."
-      is_expand: true
       is_required: true
       value_options:
-      - true
-      - false
+      - "true"
+      - "false"
   - additional_bluepill_args: ""
     opts:
-      title: "Additional Bluepill arguments"
+      title: "Additional Bluepill Arguments"
       summary: "See https://github.com/linkedin/bluepill for a full list of supported argumentss."
       is_expand: true
       is_required: false
-  - fail_build_if_coverage_fails: false
+  - fail_build_if_coverage_fails: "false"
     opts:
       title: "Fail Build on Invalid Coverage Data"
       summary: "Fail the build if Bluepill fails to gather valid coverage data (e.g. `${bluepill_output_dir}/${target_name}.app.coverage.txt`)"
-      is_required: true
       value_options:
-      - false
-      - true
+      - "false"
+      - "true"
   - test_result_env_var: "TEST_RESULTS"
     opts:
       title: "Test Results Output Environment Variable"
