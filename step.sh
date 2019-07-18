@@ -38,13 +38,18 @@ printf "\n\nBuilding App...\n"
 # Not going to require this as a hard dependency because it's just a nice-to-have.
 XCPRETTY_OR_CAT=$(which xcpretty && echo xcpretty || echo cat)
 
+# Include code coverage flag if required.
+ENABLE_CODE_COV=""
+if [ "$generate_coverage" == "true" ]; then
+  ENABLE_CODE_COV="-enableCodeCoverage YES"
+fi
+
 # Build for testing
-xcodebuild build-for-testing \
+xcodebuild build-for-testing $ENABLE_CODE_COV ${additional_xcodebuild_args} \
   -derivedDataPath "${derived_data_path}" \
   -workspace "${workspace}" \
   -scheme "${scheme}" \
   -destination "platform=iOS Simulator,name=${device_type},OS=${ios_version}" \
-  -enableCodeCoverage "YES" \
   | eval $XCPRETTY_OR_CAT
 
 # ---  3. RUN TESTS --- #
@@ -81,31 +86,35 @@ else
   results_markdown="$results_full"
 fi
 
-# --- 4. COLLECT COVERAGE ---
+# --- 4. COLLECT COVERAGE (OPTIONAL) ---
 
-# Don't fail the build if coverage fail...
-set +e
+if [ "$generate_coverage" == "true" ]; then
+  # Don't fail the build if coverage fail...
+  set +e
 
-coverage_file="${bluepill_output_dir}/${target_name}.app.coverage.txt"
+  coverage_file="${bluepill_output_dir}/${target_name}.app.coverage.txt"
 
-# Merge coverage profile
-xcrun llvm-profdata merge \
-    -sparse \
-    -o ${bluepill_output_dir}/Coverage.profdata \
-    ${bluepill_output_dir}/**/**/*.profraw \
-    || coverage_failed=true
-
-# Generate coverage report
-if ! [ "$coverage_failed" == "true" ]; then
-  xcrun llvm-cov show \
-      -instr-profile ${bluepill_output_dir}/Coverage.profdata \
-      ${derived_data_path}/Build/Products/*/${target_name}.app/${target_name} \
-      > ${coverage_file} \
+  # Merge coverage profile
+  xcrun llvm-profdata merge \
+      -sparse \
+      -o ${bluepill_output_dir}/Coverage.profdata \
+      ${bluepill_output_dir}/**/**/*.profraw \
       || coverage_failed=true
-fi
 
-# ...renable failures.
-set -e
+  # Generate coverage report
+  if ! [ "$coverage_failed" == "true" ]; then
+    xcrun llvm-cov show \
+        -instr-profile ${bluepill_output_dir}/Coverage.profdata \
+        ${derived_data_path}/Build/Products/*/${target_name}.app/${target_name} \
+        > ${coverage_file} \
+        || coverage_failed=true
+  fi
+
+  # ...renable failures.
+  set -e
+else
+  printf "\nSkipping coverage\n"
+fi
 
 # --- 5. EXPORT ENV VARS ---
 
@@ -125,16 +134,19 @@ then
   exit -1
 fi
 
-# Coverage logging
-if [ "$coverage_failed" == "true" ]; then
-  if [ "$fail_build_if_coverage_fails" == "true" ]; then
-    printf "\nFailed to gather coverage data and \$fail_build_if_coverage_fails is set to true.\n"
-    exit -1
+# Report coverage if coverage is set to generate.
+if [ "$generate_coverage" == "true" ]; then
+  # Coverage logging
+  if [ "$coverage_failed" == "true" ]; then
+    if [ "$fail_build_if_coverage_fails" == "true" ]; then
+      printf "\nFailed to gather coverage data and \$fail_build_if_coverage_fails is set to true.\n"
+      exit -1
+    else
+      printf "\nFailed to gather coverage data but \$fail_build_if_coverage_fails is set to false.\n"
+    fi
   else
-    printf "\nFailed to gather coverage data but \$fail_build_if_coverage_fails is set to false.\n"
+    printf "\nCoverage report generated at: $coverage_file\n"
   fi
-else
-  printf "\nCoverage report generated at: $coverage_file\n"
 fi
 
 exit 0

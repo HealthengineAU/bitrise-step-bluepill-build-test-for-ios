@@ -66,6 +66,14 @@ inputs:
       summary: "Derived data directory (e.g. 'build')"
       is_expand: true
       is_required: true
+  - generate_coverage: "true"
+    opts:
+      title: "Generate Coverage"
+      summary: "Generate code coverage for the build."
+      is_required: true
+      value_options:
+      - "true"
+      - "false"
   - bluepill_output_dir: "bluepill-output"
     opts:
       title: "Bluepill Logs Path"
@@ -92,6 +100,12 @@ inputs:
       value_options:
       - "true"
       - "false"
+  - additional_xcodebuild_args: ""
+    opts:
+      title: "Additional Xcodebuild Arguments"
+      summary: "Additional arguments to send to `xcodebuild`"
+      is_expand: true
+      is_required: false
   - additional_bluepill_args: ""
     opts:
       title: "Additional Bluepill Arguments"

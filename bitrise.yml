@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - BITRISE_STEP_ID: bluepill-build-test-for-ios
-  - BITRISE_STEP_VERSION: "0.2.4"
+  - BITRISE_STEP_VERSION: "0.2.7"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/HealthEngineAU/bitrise-step-bluepill-build-test-for-ios.git
   - BITRISE_SAMPLE_APP: https://github.com/reececomo/sample-apps-ios-workspace-swift.git
 
@@ -39,6 +39,7 @@ workflows:
         - device_type: "iPhone SE"
         - bluepill_output_dir: bluepill-output
         - test_result_env_var: MY_TESTS
+        - generate_coverage: "true"
     - script:
         title: Check the test results are set
         inputs:
