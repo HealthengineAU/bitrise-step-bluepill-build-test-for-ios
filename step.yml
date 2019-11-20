@@ -15,12 +15,13 @@ is_requires_admin_user: true
 is_always_run: false
 is_skippable: false
 inputs:
-  - bluepill_version: bluepill_5_0_0__xcode_11_0
+  - bluepill_version: bluepill_5_1_1__xcode_11_2
     opts:
       title: "Bluepill Version"
       summary: "Which version of Bluepill to install/run?"
       is_required: true
       value_options:
+      - bluepill_5_1_1__xcode_11_2
       - bluepill_5_0_0__xcode_11_0
       - bluepill_4_1_1__xcode_10_2
       - bluepill_3_1_1__xcode_10_1
