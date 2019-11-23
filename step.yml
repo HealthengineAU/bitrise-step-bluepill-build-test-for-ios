@@ -15,12 +15,13 @@ is_requires_admin_user: true
 is_always_run: false
 is_skippable: false
 inputs:
-  - bluepill_version: bluepill_5_0_0__xcode_11_0
+  - bluepill_version: bluepill_5_1_1__xcode_11_2
     opts:
       title: "Bluepill Version"
       summary: "Which version of Bluepill to install/run?"
       is_required: true
       value_options:
+      - bluepill_5_1_1__xcode_11_2
       - bluepill_5_0_0__xcode_11_0
       - bluepill_4_1_1__xcode_10_2
       - bluepill_3_1_1__xcode_10_1
@@ -49,16 +50,16 @@ inputs:
       summary: "Xcode workspace file (e.g. MyApp.xcworkspace)"
       is_expand: true
       is_required: true
-  - device_type: "iPhone 6"
+  - device_type: "iPhone 11"
     opts:
       title: "Device Type"
-      summary: "iOS Device to build/run (e.g. 'iPhone 6', 'iPad Pro (12.9-inch)')"
+      summary: "iOS Device to build/run (e.g. 'iPhone 11', 'iPad Pro (12.9-inch) (3rd generation)')"
       is_expand: true
       is_required: true
-  - ios_version: "13.0"
+  - ios_version: "13.2.2"
     opts:
       title: "iOS Version"
-      summary: "iOS Version to build/run simulators (e.g. '12.2', '13.0')"
+      summary: "iOS Version to build/run simulators (e.g. '12.4', '13.2.2')"
       is_expand: true
       is_required: true
   - derived_data_path: ""
