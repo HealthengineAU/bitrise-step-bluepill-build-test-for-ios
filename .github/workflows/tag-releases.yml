@@ -14,7 +14,6 @@ jobs:
       
       # Increments the tag if merged from PR to master
     - name: Bump Tag
-      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.branch
       uses: anothrNick/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
