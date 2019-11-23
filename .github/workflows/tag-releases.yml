@@ -11,7 +11,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Github Tag Bump and `latest` tag update
+      
+      # Increments the tag if merged from PR to master
+    - name: Bump Tag
       if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.branch
       uses: anothrNick/github-tag-action@master
       env:
