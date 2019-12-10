@@ -21,3 +21,17 @@ A Bitrise Step for running iOS UI/Unit Tests in parallel (using multiple simulat
 ## Acknowledgement (from [linkedin/bluepill](https://github.com/linkedin/bluepill))
 - Bluepill was inspired by [parallel iOS test](https://github.com/plu/parallel_ios_tests) and Facebook’s [xctool](https://github.com/facebook/xctool) and [FBSimulatorControl](https://github.com/facebook/FBSimulatorControl).
 - The Bluepill icon was created by [Maria Iu](https://www.linkedin.com/in/mariaiu/)
+
+# Publish updates to the official Bitrise Step Library
+- Create and tag your release in this repo.
+- [Follow the Bitrise guide to publish updates:](https://devcenter.bitrise.io/contributors/create-your-own-step/#sharing-a-new-step)
+  - ```bash
+    # Install Bitrise CLI tool (if not already installed)
+    $ brew update && brew install bitrise
+
+    # Publish your change to any StepLib fork
+    $ bitrise share start -c https://github.com/[your-username]/bitrise-steplib.git
+    $ bitrise share create --tag [step-version-tag] --git [step-git-uri].git --stepid [step-id]
+    
+    # Then submit a PR to merge it into the official Bitrise StepLib
+    ```
