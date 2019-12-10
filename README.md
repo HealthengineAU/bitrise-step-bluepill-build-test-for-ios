@@ -30,7 +30,7 @@ A Bitrise Step for running iOS UI/Unit Tests in parallel (using multiple simulat
     $ brew update && brew install bitrise
 
     # Publish your change to any StepLib fork
-    $ bitrise share start -c https://github.com/[your-username]/bitrise-steplib.git
+    $ bitrise share start -c git@github.com:[your-username]/bitrise-steplib.git
     $ bitrise share create --tag [step-version-tag] --git [step-git-uri].git --stepid [step-id]
     
     # Then submit a PR to merge it into the official Bitrise StepLib
