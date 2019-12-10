@@ -28,11 +28,13 @@ A Bitrise Step for running iOS UI/Unit Tests in parallel (using multiple simulat
 $ brew update && brew install bitrise
 
 # 2. Fork official Bitrise StepLib
-# https://github.com/bitrise-io/bitrise-steplib
+# (On Github) https://github.com/bitrise-io/bitrise-steplib
 
 # 3. Publish your change to any StepLib fork
 $ bitrise share start -c git@github.com:[your-username]/bitrise-steplib.git
 $ bitrise share create --tag [step-version-tag] --git https://github.com/HealthEngineAU/bitrise-step-bluepill-build-test-for-ios/.git --stepid bluepill-build-test-for-ios
+$ bitrise share finish
 
-# 4. Submit it the official StepLib (submit your fork as a Pull Request)
-    ```
+# 4. Finish & submit to the official StepLib
+# (On Github) https://github.com/[your-username]/bitrise-steplib.git
+```
