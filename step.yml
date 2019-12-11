@@ -56,10 +56,10 @@ inputs:
       summary: "iOS Device to build/run (e.g. 'iPhone 11', 'iPad Pro (12.9-inch) (3rd generation)')"
       is_expand: true
       is_required: true
-  - ios_version: "13.2.2"
+  - ios_version: "13.2"
     opts:
       title: "iOS Version"
-      summary: "iOS Version to build/run simulators (e.g. '12.4', '13.2.2')"
+      summary: "iOS Version to build/run simulators (e.g. '12.4', '13.2')"
       is_expand: true
       is_required: true
   - derived_data_path: ""
