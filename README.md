@@ -32,7 +32,7 @@ $ brew update && brew install bitrise
 
 # 3. Publish your change to any StepLib fork
 $ bitrise share start -c git@github.com:[your-username]/bitrise-steplib.git
-$ bitrise share create --tag [step-version-tag] --git https://github.com/HealthEngineAU/bitrise-step-bluepill-build-test-for-ios/.git --stepid bluepill-build-test-for-ios
+$ bitrise share create --git https://github.com/HealthEngineAU/bitrise-step-bluepill-build-test-for-ios.git --stepid bluepill-build-test-for-ios --tag [step-version-tag]
 $ bitrise share finish
 
 # 4. Finish & submit to the official StepLib
